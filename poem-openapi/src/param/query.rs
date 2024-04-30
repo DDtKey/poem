@@ -80,6 +80,16 @@ impl<'a, T: ParseFromParameter> ApiExtractor<'a> for Query<T> {
                     }
                     .into()
                 })
+        } else if values.peek().is_none() {
+            ParseFromParameter::parse_from_parameters::<Vec<String>, String>(vec![])
+                .map(Self)
+                .map_err(|err| {
+                    ParseParamError {
+                        name: param_opts.name,
+                        reason: err.into_message(),
+                    }
+                        .into()
+                })
         } else {
             let values = values.next().unwrap().split(',').map(|v| v.trim());
             ParseFromParameter::parse_from_parameters(values)
@@ -89,7 +99,7 @@ impl<'a, T: ParseFromParameter> ApiExtractor<'a> for Query<T> {
                         name: param_opts.name,
                         reason: err.into_message(),
                     }
-                    .into()
+                        .into()
                 })
         }
     }
